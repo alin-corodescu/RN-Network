@@ -20,8 +20,8 @@ def sigmoid_derived(z):
 
 class Network:
     weights = [np.array([])
-        , np.array([np.random.normal(size=784)  for j in range(100)])
-        , np.array([np.random.normal(size=100) for j1 in range(10)])
+        , np.array([np.random.normal(0, 1.0/math.sqrt(784),size=784)  for j in range(100)])
+        , np.array([np.random.normal(0, 1.0/math.sqrt(100),size=100) for j1 in range(10)])
     ]
 
     biases = [
@@ -83,6 +83,21 @@ class Network:
 
                 #         The current batch has finished
                 self.commitChanges()
+            print("Iteration %d done" % iteration)
+            correct = 0
+            incorrect = 0
+            for entry in train_set:
+                inputs = entry[0]
+                target = entry[1]
+                digit = self.classifyDigit(inputs)
+                if digit == target:
+                    correct+=1
+                else:
+                    incorrect+=1
+
+            print("[TRAIN]Correct instances : ", correct)
+            print("[TRAIN]Incorrect instances : ", incorrect)
+            print("[TRAIN]Precision :", correct / (correct + incorrect))
 
     def classifyDigit(self, inputs):
         self.y[0] = np.array(inputs)
@@ -113,14 +128,14 @@ class Network:
         self.weights = np.add(self.weights, -self.d_weights)
         self.biases = np.add(self.biases, -self.d_biases)
         self.d_weights = [np.array([])
-            , np.array([[0 for i13 in range(784)] for j4 in range(100)])
-            , np.array([[0 for i14 in range(100)] for j5 in range(10)])
+            , np.array([[0.0 for i13 in range(784)] for j4 in range(100)])
+            , np.array([[0.0 for i14 in range(100)] for j5 in range(10)])
             ]
 
         self.d_biases = [
             np.array([]),
-            np.array([0 for i in range(100)])
-            , np.array([0 for i in range(10)])]
+            np.array([0.0 for i in range(100)])
+            , np.array([0.0 for i in range(10)])]
 
     def backpropagate(self):
 #         The error is computed for the last layer
@@ -144,9 +159,9 @@ if __name__ == '__main__':
     network = Network()
     # print(zip(train_set[0], train_set[1]))
     reduced_train_set = list(zip(train_set[0],train_set[1]))
-    reduced_train_set = reduced_train_set[:len(reduced_train_set)//50]
+    reduced_train_set = reduced_train_set[:len(reduced_train_set)//5]
 
-    network.train(reduced_train_set, 6, 5, 10)
+    network.train(reduced_train_set, 30, 3, 10)
 
     correct = 0
     incorrect = 0
@@ -157,6 +172,6 @@ if __name__ == '__main__':
         else:
             incorrect+=1
 
-    print("Correct instances : ", correct)
-    print("Incorrect instances : ", incorrect)
-    print("Precision :", correct/(correct + incorrect))
+    print("[TEST]Correct instances : ", correct)
+    print("[TEST]Incorrect instances : ", incorrect)
+    print("[TEST]Precision :", correct/(correct + incorrect))
