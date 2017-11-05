@@ -18,6 +18,11 @@ def sigmoid_derived(z):
     return sigmoid(z)*(1-sigmoid(z))
 
 
+def softmax(zs):
+    sum = np.sum(np.exp(zs))
+    return np.exp(zs)/sum
+
+
 class Network:
     weights = [np.array([])
         , np.array([np.random.normal(0, 1.0/math.sqrt(784),size=784)  for j in range(100)])
@@ -112,10 +117,11 @@ class Network:
         for i in range(1,3):
             for j in range(len(self.z[i])):
                 self.z[i][j] = np.dot(self.weights[i][j], self.y[i-1]) + self.biases[i][j]
-                output = sigmoid(self.z[i][j])
-                self.y[i][j] = output
-            self.y[i] = sigmoid(self.z[i])
-        # todo make the last layer use softmax function
+            if i == 2:
+                # self.y[i] = sigmoid(self.z[i])
+                self.y[i] = softmax(self.z[i])
+            else:
+                self.y[i] = sigmoid(self.z[i])
 
     def computeErrorLastLayer(self, target):
         for i in range(10):
@@ -159,9 +165,9 @@ if __name__ == '__main__':
     network = Network()
     # print(zip(train_set[0], train_set[1]))
     reduced_train_set = list(zip(train_set[0],train_set[1]))
-    reduced_train_set = reduced_train_set[:len(reduced_train_set)]
+    reduced_train_set = reduced_train_set[:len(reduced_train_set)//50]
 
-    network.train(reduced_train_set, 1, 0.5, 10)
+    network.train(reduced_train_set, 5, 0.5, 5)
 
     correct = 0
     incorrect = 0
