@@ -2,7 +2,7 @@ import gzip
 import random
 import pickle
 import numpy as np
-
+import math
 
 def split_into_batches(train_set, batch_size):
     random.shuffle(train_set)
@@ -20,40 +20,42 @@ def sigmoid_derived(z):
 
 class Network:
     weights = [np.array([])
-        , np.array([[np.random.normal() for i in range(784)] for j in range(100)])
-        , np.array([[np.random.normal() for i in range(100)]] for j in range(10))]
+        , np.array([np.random.normal(size=784)  for j in range(100)])
+        , np.array([np.random.normal(size=100) for j1 in range(10)])
+    ]
 
     biases = [
         np.array([]),
-        np.array([np.random.normal() for i in range(100)])
-        , np.array([np.random.normal() for i in range(10)])]
+        np.random.normal(size=100),
+        np.random.normal(size=10)]
 
     y = [
-        np.array([0 for i in range(784)]),
-        np.array([0 for i in range(100)]),
-        np.array([0 for i in range(10)])
+        np.array([0.0 for i4 in range(784)]),
+        np.array([0.0 for i5 in range(100)]),
+        np.array([0.0 for i6 in range(10)])
     ]
 
     z = [
-        np.array([0 for i in range(784)]),
-        np.array([0 for i in range(100)]),
-        np.array([0 for i in range(10)])
+        np.array([0.0 for i7 in range(784)]),
+        np.array([0.0 for i8 in range(100)]),
+        np.array([0.0 for i9 in range(10)])
     ]
 
     errors = [
-        np.array([0 for i in range(784)]),
-        np.array([0 for i in range(100)]),
-        np.array([0 for i in range(10)])
+        np.array([0.0 for i0 in range(784)]),
+        np.array([0.0 for i11 in range(100)]),
+        np.array([0.0 for i12 in range(10)])
     ]
 
     d_weights = [np.array([])
-        , np.array([[0 for i in range(784)] for j in range(100)])
-        , np.array([[0 for i in range(100)]] for j in range(10))]
+        , np.array([[0.0 for i13 in range(784)] for j4 in range(100)])
+        , np.array([[0.0 for i14 in range(100)] for j5 in range(10)])
+        ]
 
     d_biases = [
         np.array([]),
-        np.array([0 for i in range(100)])
-        , np.array([0 for i in range(10)])]
+        np.array([0.0 for i15 in range(100)])
+        , np.array([0.0 for i16 in range(10)])]
 
     batch_size = 1
     learn_rate = 3
@@ -64,7 +66,9 @@ class Network:
             #   Split into mini batches
             batches = split_into_batches(train_set, batch_size)
             for batch in batches:
-                for inputs,target in zip(batch[0],batch[1]):
+                for tuple in batch:
+                    inputs = tuple[0]
+                    target = tuple[1]
                     # Grab the inputs and feed them through the network
                     self.y[0] = np.array(inputs)
                     # Feed forward the entry
@@ -80,11 +84,11 @@ class Network:
                 #         The current batch has finished
                 self.commitChanges()
 
-    def classifyInstance(self, inputs):
+    def classifyDigit(self, inputs):
         self.y[0] = np.array(inputs)
         self.classifyInstance()
-
-        results = list(self.y[0])
+        #todo check why y[0] contained 355 for example
+        results = list(self.y[-1])
         recognised_digit = results.index(max(results))
 
         return recognised_digit
@@ -93,7 +97,9 @@ class Network:
         for i in range(1,3):
             for j in range(len(self.z[i])):
                 self.z[i][j] = np.dot(self.weights[i][j], self.y[i-1]) + self.biases[i][j]
-                self.y[i][j] = sigmoid(self.z[i][j])
+                output = sigmoid(self.z[i][j])
+                self.y[i][j] = output
+            self.y[i] = sigmoid(self.z[i])
         # todo make the last layer use softmax function
 
     def computeErrorLastLayer(self, target):
@@ -107,8 +113,9 @@ class Network:
         self.weights = np.add(self.weights, -self.d_weights)
         self.biases = np.add(self.biases, -self.d_biases)
         self.d_weights = [np.array([])
-            , np.array([[0 for i in range(784)] for j in range(100)])
-            , np.array([[0 for i in range(100)]] for j in range(10))]
+            , np.array([[0 for i13 in range(784)] for j4 in range(100)])
+            , np.array([[0 for i14 in range(100)] for j5 in range(10)])
+            ]
 
         self.d_biases = [
             np.array([]),
@@ -118,12 +125,12 @@ class Network:
     def backpropagate(self):
 #         The error is computed for the last layer
         for i in range(1,-1,-1):
-            self.errors[i] = np.dot(self.weights[i+1], self.errors[i+1]) * sigmoid_derived(self.z[i])
+            self.errors[i] = np.dot(self.errors[i+1], self.weights[i+1]) * sigmoid_derived(self.z[i])
             # Compute the difference in weights and bias
             # todo maybe find a way to do this in numpy directly
             for j in range(len(self.d_weights[i+1])):
                 self.d_weights[i+1][j] = np.add(self.d_weights[i+1][j], np.multiply(self.y[i], self.errors[i+1][j]))
-            self.d_biases[i+1] = np.add(self.d_biases, self.errors[i+1])
+            self.d_biases[i+1] = np.add(self.d_biases[i+1], self.errors[i+1])
 
         pass
 
@@ -139,13 +146,12 @@ if __name__ == '__main__':
     reduced_train_set = list(zip(train_set[0],train_set[1]))
     reduced_train_set = reduced_train_set[:len(reduced_train_set)//5]
 
-    train_set[0], train_set[1] = zip(*reduced_train_set)
-    network.train(train_set, 30, 3, 10)
+    network.train(reduced_train_set, 1, 5, 10)
 
     correct = 0
-    incorrect = 1
+    incorrect = 0
     for inp,target in zip(test_set[0],test_set[1]):
-        digit = network.classifyInstance(inputs = inp)
+        digit = network.classifyDigit(inputs = inp)
         if digit == target:
             correct+=1
         else:

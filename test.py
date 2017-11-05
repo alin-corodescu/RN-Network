@@ -20,11 +20,16 @@ def sigmoid(z):
 # print(np.multiply([[1,2],[3,4]],[1,2]))
 
 # self.d_weights[i + 1] = np.add(self.d_weights[i + 1], np.dot(self.y[i], self.errors[i + 1]))
+#
+# w = np.array([[[1,2],[3,4]]])
+# d = np.array([1,2])
+# y = np.array([5,6])
+# print(w[0][0])
+# print(np.multiply(y,d[0]))
+# w = np.add(w, -np.multiply(y,d) * 0.5)
+# print(w)
 
-w = np.array([[[1,2],[3,4]]])
-d = np.array([1,2])
-y = np.array([5,6])
-print(w[0][0])
-print(np.multiply(y,d[0]))
-w = np.add(w, -np.multiply(y,d) * 0.5)
-print(w)
+
+x = [(1,2) , (3,4) , (5,6)]
+a,b = zip(*x)
+print(a,b)
