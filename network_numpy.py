@@ -64,7 +64,14 @@ class Network:
 
     batch_size = 1
     learn_rate = 3
-    def train(self, train_set, iterations, learn_rate, batch_size):
+
+    regularization_rate = 0.1
+
+    n = None
+
+    def train(self, train_set, iterations, learn_rate, batch_size, regularization_rate):
+        self.n = len(train_set)//batch_size
+        self.regularization_rate = regularization_rate
         self.batch_size = batch_size
         self.learn_rate = learn_rate
         for iteration in range(iterations):
@@ -131,7 +138,7 @@ class Network:
     def commitChanges(self):
         self.d_weights = np.multiply(self.d_weights, self.learn_rate/self.batch_size)
         self.d_biases = np.multiply(self.d_biases, self.learn_rate/self.batch_size)
-        self.weights = np.add(self.weights, -self.d_weights)
+        self.weights = np.add(np.multiply(self.weights, (1.0 - self.learn_rate * self.regularization_rate/ self.n)), -self.d_weights)
         self.biases = np.add(self.biases, -self.d_biases)
         self.d_weights = [np.array([])
             , np.array([[0.0 for i13 in range(784)] for j4 in range(100)])
@@ -165,9 +172,9 @@ if __name__ == '__main__':
     network = Network()
     # print(zip(train_set[0], train_set[1]))
     reduced_train_set = list(zip(train_set[0],train_set[1]))
-    reduced_train_set = reduced_train_set[:len(reduced_train_set)//50]
+    reduced_train_set = reduced_train_set[:len(reduced_train_set)]
 
-    network.train(reduced_train_set, 5, 0.5, 5)
+    network.train(reduced_train_set, 1, 0.5, 5, 0.1)
 
     correct = 0
     incorrect = 0
