@@ -159,9 +159,9 @@ if __name__ == '__main__':
     network = Network()
     # print(zip(train_set[0], train_set[1]))
     reduced_train_set = list(zip(train_set[0],train_set[1]))
-    reduced_train_set = reduced_train_set[:len(reduced_train_set)//5]
+    reduced_train_set = reduced_train_set[:len(reduced_train_set)]
 
-    network.train(reduced_train_set, 30, 3, 10)
+    network.train(reduced_train_set, 1, 0.5, 10)
 
     correct = 0
     incorrect = 0
