@@ -62,18 +62,25 @@ class Network:
         np.array([0.0 for i15 in range(100)])
         , np.array([0.0 for i16 in range(10)])]
 
+    momentum = [np.array([])
+        , np.array([[0.0 for i17 in range(784)] for j6 in range(100)])
+        , np.array([[0.0 for i18 in range(100)] for j7 in range(10)])
+        ]
+
     batch_size = 1
     learn_rate = 3
 
     regularization_rate = 0.1
 
+    friction = 0.7
     n = None
 
-    def train(self, train_set, iterations, learn_rate, batch_size, regularization_rate):
+    def train(self, train_set, iterations, learn_rate, batch_size, regularization_rate, friction):
         self.n = len(train_set)//batch_size
         self.regularization_rate = regularization_rate
         self.batch_size = batch_size
         self.learn_rate = learn_rate
+        self.friction = friction
         for iteration in range(iterations):
             #   Split into mini batches
             batches = split_into_batches(train_set, batch_size)
@@ -138,7 +145,11 @@ class Network:
     def commitChanges(self):
         self.d_weights = np.multiply(self.d_weights, self.learn_rate/self.batch_size)
         self.d_biases = np.multiply(self.d_biases, self.learn_rate/self.batch_size)
-        self.weights = np.add(np.multiply(self.weights, (1.0 - self.learn_rate * self.regularization_rate/ self.n)), -self.d_weights)
+        # instead of modifying weights directly, use the speed
+        self.momentum = np.add(np.multiply(self.momentum, self.friction), self.d_weights)
+        self.weights = np.add(np.multiply(self.weights, (1.0 - self.learn_rate * self.regularization_rate/ self.n)), -self.momentum)
+        # self.weights = np.add(np.multiply(self.weights, (1.0 - self.learn_rate * self.regularization_rate/ self.n)), -self.d_weights)
+
         self.biases = np.add(self.biases, -self.d_biases)
         self.d_weights = [np.array([])
             , np.array([[0.0 for i13 in range(784)] for j4 in range(100)])
@@ -172,9 +183,9 @@ if __name__ == '__main__':
     network = Network()
     # print(zip(train_set[0], train_set[1]))
     reduced_train_set = list(zip(train_set[0],train_set[1]))
-    reduced_train_set = reduced_train_set[:len(reduced_train_set)]
+    reduced_train_set = reduced_train_set[:len(reduced_train_set)//5]
 
-    network.train(reduced_train_set, 1, 0.5, 5, 0.1)
+    network.train(reduced_train_set, iterations = 1, learn_rate=0.5, batch_size=5, regularization_rate=0.1, friction=0.2)
 
     correct = 0
     incorrect = 0
