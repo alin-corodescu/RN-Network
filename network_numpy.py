@@ -82,6 +82,10 @@ class Network:
         self.learn_rate = learn_rate
         self.friction = friction
         for iteration in range(iterations):
+            self.momentum = [np.array([])
+        , np.array([[0.0 for i17 in range(784)] for j6 in range(100)])
+        , np.array([[0.0 for i18 in range(100)] for j7 in range(10)])
+        ]
             #   Split into mini batches
             batches = split_into_batches(train_set, batch_size)
             for batch in batches:
@@ -183,9 +187,9 @@ if __name__ == '__main__':
     network = Network()
     # print(zip(train_set[0], train_set[1]))
     reduced_train_set = list(zip(train_set[0],train_set[1]))
-    reduced_train_set = reduced_train_set[:len(reduced_train_set)//5]
+    reduced_train_set = reduced_train_set[:len(reduced_train_set)]
 
-    network.train(reduced_train_set, iterations = 1, learn_rate=0.5, batch_size=5, regularization_rate=0.1, friction=0.2)
+    network.train(reduced_train_set, iterations = 2, learn_rate=0.5, batch_size=10, regularization_rate=0.2, friction=0.1)
 
     correct = 0
     incorrect = 0
